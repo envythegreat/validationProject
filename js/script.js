@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () =>{
     $("#other-title").hide();
     $("#other-title").prop('disabled', true);
     $("#color option").hide();
-    $("#color").prepend($('<option>').attr('selected', true).text("Please select a T-shirt theme").val("Default") );
+    $("#color").prepend($('<option>').attr('selected', false).text("Please select a T-shirt theme").val("Default") );
     $("#colors-js-puns").hide();
     $("#paypal").hide()
     $("#bitcoin").hide()
@@ -15,7 +15,7 @@ document.addEventListener('DOMContentLoaded', () =>{
 const getColorMenu = (desing) => {
     $("#color option").each(function () {
         const $chText = $(this).text();
-        $chText.includes(desing) ? $(this).show().attr('selected', true) : $(this).hide();
+        $chText.includes(desing) ? $(this).show().attr('selected', true) : $(this).hide().attr('selected', false);
     });
 };
 // event listener to show the input with [#other-title] id if other option has been selected in #title select
@@ -29,35 +29,40 @@ $("#title").on("change", () => {
     }
 });
 // event listener to change payment option
-$("#payment").on("change", ()=>{
-    if ( $("#payment").val() === "Credit Card" ){
-        $("#paypal").hide();
-        $("#bitcoin").hide();
-        $("#credit-card").show();
-    } else if ( $("#payment").val() === "PayPal" ){
-        $("#bitcoin").hide();
-        $("#credit-card").hide();
-        $("#paypal").show();
-        $("#credit-card input").prop("disabled", true);
-    }else if ( $("#payment").val() === "Bitcoin" ){
-        $("#credit-card").hide();
-        $("#paypal").hide();
-        $("#bitcoin").show();
-        $("#credit-card input").prop("disabled", true);
+function updatePaymentInfo() {
+    const   selectedPaymentMethod = $('#payment').val()
+            creditCard = $('#credit-card').hide(),
+            paypal = $('#paypal').hide(),
+            bitcoin = $('#bitcoin').hide(), 
+            creditCard.find('input, select').prop('disabled', true)
+    
+    switch ( selectedPaymentMethod ) {
+        case 'Credit Card':
+            creditCard.show()
+                .find('input, select')
+                .prop('disabled', false)
+            break
+        case 'PayPal':
+            paypal.show()
+            break
+        case 'Bitcoin':
+            bitcoin.show()
+            break
     }
-});
-// event listener to show select && filter color option when [#design] option is changed .
-$("#design").on("change", () => {
-    $("#colors-js-puns").show(); // show select option color
-    $('#pp').hide(); // hide the first element on the selected desing option 
-    $("color option").each( () => { // make sure that all option are unselected at the beginning 
-        if ($(this).attr("selected")) {
-            $(this).attr("selected",  false);
-        }
-    });
-    getColorMenu($("#design").val());
-});
+}
+function updateTShirtColor(evt) {
+    const selectedTheme = evt.target.value
+    const colorSelection = $('#colors-js-puns')
+    $('#ssDefs').hide()
+    if (selectedTheme){
+        colorSelection.show()
+        getColorMenu(selectedTheme)
+        console.log(selectedTheme)
+    }
+    // else  colorSelection.find('select').prop('disabled', true).end().hide()
+}
 
+// event listener to show select && filter color option when [#design] option is changed .
 $('.activities').on('change', function(e) {
     const clicked = $(e.target);
     let activityCost = clicked.attr('data-cost');
@@ -126,6 +131,10 @@ const checkedAct = () => { // check if there is any activity selected or no
         return false;
     };
 }
+console.log(valArray[1].regex)
+$('#payment').val('Credit Card').prop('selected',  true)
+$('#payment').on('change', updatePaymentInfo)
+$('#design').on('change', updateTShirtColor)
 $('form').on('submit', (e)=>{
     $('form .error').remove();
     $('form input').each(function(i, input){ // loop throught all inputs in form and see if there is is any error and stop form from submittion 
@@ -135,13 +144,24 @@ $('form').on('submit', (e)=>{
                 if ( $(input).val() === '' && !$(input).prop("disabled")){
                     newError(valArray[j].errorEmpty, $(input));
                     e.preventDefault();
-                }  
+                }
             }
+            // if (!valArray[j].regex.test($(valArray[j].id).val())){
+            //     // console.log('sskid')
+            //     e.preventDefault();
+            // }
         }
     });
     if (!checkedAct()){
         $('.activities legend').after(ErrorAct);
         e.preventDefault();
+    }
+    if (!valArray[0].regex.test($('#mail').val()) ||
+        !valArray[1].regex.test($('#cc-num').val()) ||
+        !valArray[2].regex.test($('#zip').val()) ||
+        !valArray[3].regex.test($('#cvv').val()) ||
+        !valArray[4].regex.test($('#name').val()) ){
+            e.preventDefault();
     }
     if ( !$("#other-title").prop('disabled') && $("#other-title").val() === ""){
         $("#other-title").before(ErrorRole);
