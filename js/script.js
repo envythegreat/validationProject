@@ -157,11 +157,15 @@ $('form').on('submit', (e)=>{
         e.preventDefault();
     }
     if (!valArray[0].regex.test($('#mail').val()) ||
-        !valArray[1].regex.test($('#cc-num').val()) ||
+        !valArray[4].regex.test($('#name').val()) ) {
+        e.preventDefault();
+    }
+    if (!$('#credit-card input').prop("disabled")){
+        if (!valArray[1].regex.test($('#cc-num').val()) ||
         !valArray[2].regex.test($('#zip').val()) ||
-        !valArray[3].regex.test($('#cvv').val()) ||
-        !valArray[4].regex.test($('#name').val()) ){
+        !valArray[3].regex.test($('#cvv').val()) ){
             e.preventDefault();
+    }
     }
     if ( !$("#other-title").prop('disabled') && $("#other-title").val() === ""){
         $("#other-title").before(ErrorRole);
